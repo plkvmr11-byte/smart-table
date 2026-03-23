@@ -1,24 +1,19 @@
-import './fonts/ys-display/fonts.css'
-import './style.css'
+import './fonts/ys-display/fonts.css';
+import './style.css';
 
-import {data as sourceData} from "./data/dataset_1.js";
+import { data as sourceData } from "./data/dataset_1.js";
 
-import {initData} from "./data.js";
-import {processFormData} from "./lib/utils.js";
+import { initData } from "./data.js";
+import { processFormData } from "./lib/utils.js";
 
-import {initTable} from "./components/table.js";
-// @todo: подключение
+import { initTable } from "./components/table.js";
+import { initPagination } from "./components/pagination.js";
+import { initSorting } from "./components/sorting.js";
+import { initFiltering } from "./components/filtering.js";
+import { initSearching } from "./components/searching.js"; // ✅ добавили поиск
 
-import {initPagination} from "./components/pagination.js";
-
-import {initSorting} from "./components/sorting.js";
-
-import {initFiltering} from "./components/filtering.js";
-
-import { initSearching } from "./components/searching.js";
-
-// Исходные данные используемые в render()
-const {data, ...indexes} = initData(sourceData);
+// Исходные данные
+const { data, ...indexes } = initData(sourceData);
 
 /**
  * Сбор и обработка полей из таблицы
@@ -26,9 +21,8 @@ const {data, ...indexes} = initData(sourceData);
  */
 function collectState() {
     const state = processFormData(new FormData(sampleTable.container));
-
     const rowsPerPage = parseInt(state.rowsPerPage) || 10;
-const page = parseInt(state.page ?? 1) || 1;
+    const page = parseInt(state.page ?? 1) || 1;
 
     return {
         ...state,
@@ -42,21 +36,25 @@ const page = parseInt(state.page ?? 1) || 1;
  * @param {HTMLButtonElement?} action
  */
 function render(action) {
-    let state = collectState(); // состояние полей из таблицы
-    let result = [...data]; // копируем для последующего изменения
-    // @todo: использование
+    const state = collectState();
+    let result = [...data];
+
+    // Сначала поиск
+    result = applySearching(result, state, action);
+
+    // Потом фильтрация
     result = applyFiltering(result, state, action);
 
-    // сортировка
+    // Сортировка
     result = applySorting(result, state, action);
 
-    // пагинация ← ВАЖНО
+    // Пагинация
     result = applyPagination(result, state, action);
 
-
-    sampleTable.render(result)
+    sampleTable.render(result);
 }
 
+// Инициализация таблицы
 const sampleTable = initTable({
     tableTemplate: 'table',
     rowTemplate: 'row',
@@ -64,11 +62,22 @@ const sampleTable = initTable({
     after: ['pagination']
 }, render);
 
-// @todo: инициализация
+// Инициализация модулей
+
+const applySearching = initSearching('search'); // ✅ модуль поиска
+
+const applyFiltering = initFiltering(sampleTable.filter.elements, {
+    searchBySeller: indexes.sellers
+});
+
+const applySorting = initSorting([
+    sampleTable.header.elements.sortByDate,
+    sampleTable.header.elements.sortByTotal
+]);
 
 const applyPagination = initPagination(
-    sampleTable.pagination.elements,             // элементы пагинации из шаблона
-    (el, page, isCurrent) => {                // колбэк для заполнения кнопок
+    sampleTable.pagination.elements,
+    (el, page, isCurrent) => {
         const input = el.querySelector('input');
         const label = el.querySelector('span');
         input.value = page;
@@ -78,15 +87,7 @@ const applyPagination = initPagination(
     }
 );
 
-const applySorting = initSorting([        // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
-    sampleTable.header.elements.sortByDate,
-    sampleTable.header.elements.sortByTotal
-]);
-
-const applyFiltering = initFiltering(sampleTable.filter.elements, {    // передаём элементы фильтра
-    searchBySeller: indexes.sellers                                    // для элемента с именем searchBySeller устанавливаем массив продавцов
-});
-
+// Добавляем таблицу в DOM
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
 
