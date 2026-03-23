@@ -15,6 +15,8 @@ import {initSorting} from "./components/sorting.js";
 
 import {initFiltering} from "./components/filtering.js";
 
+import { initSearching } from "./components/searching.js";
+
 // Исходные данные используемые в render()
 const {data, ...indexes} = initData(sourceData);
 
