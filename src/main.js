@@ -10,7 +10,7 @@ import { initTable } from "./components/table.js";
 import { initPagination } from "./components/pagination.js";
 import { initSorting } from "./components/sorting.js";
 import { initFiltering } from "./components/filtering.js";
-import { initSearching } from "./components/searching.js"; // ✅ добавили поиск
+import { initSearching } from "./components/searching.js"; 
 
 // Исходные данные
 const { data, ...indexes } = initData(sourceData);
@@ -64,7 +64,7 @@ const sampleTable = initTable({
 
 // Инициализация модулей
 
-const applySearching = initSearching('search'); // ✅ модуль поиска
+const applySearching = initSearching('search'); 
 
 const applyFiltering = initFiltering(sampleTable.filter.elements, {
     searchBySeller: indexes.sellers

@@ -1,35 +1,41 @@
-import {rules, createComparison} from "../lib/compare.js";
+import { rules, createComparison } from "../lib/compare.js";
 
-
+/**
+ * Инициализация поиска по таблице
+ * @param {string} searchField - имя поля фильтра в state
+ * @returns {(data: Array, state: Object, action?: HTMLElement) => Array} - функция фильтрации данных
+ */
 export function initSearching(searchField) {
-    // @todo: #5.1 — настроить компаратор
-    const compare = createComparison({
-        [searchField]: rules.searchMultipleFields(
-            searchField,
-            ['date', 'customer', 'seller'],
-            false
-        )
-    }, 'skipEmptyTargetValues');
+    // Настройка компаратора
+    const compare = createComparison(
+        {
+            [searchField]: rules.searchMultipleFields(
+                searchField,
+                ['date', 'customer', 'seller'],
+                false
+            )
+        },
+        'skipEmptyTargetValues'
+    );
+
+    // Возвращаем функцию фильтрации
     return (data, state, action) => {
-        // @todo: #5.2 — применить компаратор
-       if (action && action.name === 'clear') {
+        // Сброс поля поиска, если нажата кнопка сброса
+        if (action && action.name === 'clear') {
             const parent = action.parentElement;
             const input = parent.querySelector('input');
             if (input) {
                 input.value = '';
-                const fieldName = action.dataset.field;
-                state[fieldName] = '';
+                state[searchField] = '';
             }
         }
 
         const searchValue = state[searchField];
 
-        // Если нет поискового запроса — возвращаем все данные
-        if (!searchValue) {
-            return data;
-        }
+        // Если поиск пустой — возвращаем все данные
+        if (!searchValue) return data;
 
-        // Фильтруем данные по поисковому запросу
+        // Фильтруем данные с помощью компаратора
         return data.filter(row => compare(row, state));
     };
 }
