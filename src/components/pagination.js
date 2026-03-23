@@ -12,6 +12,7 @@ function getPages(current, total, maxVisible) {
     for (let i = start; i <= end; i++) {
         pages.push(i);
     }
+    
 
     return pages;
 }
