@@ -17,6 +17,7 @@ export function initSearching(searchField) {
         },
         'skipEmptyTargetValues'
     );
+    
 
     // Возвращаем функцию фильтрации
     return (data, state, action) => {
