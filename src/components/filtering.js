@@ -41,6 +41,14 @@ export function initFiltering(elements, indexes) {
             }
         }
 
+         const filterState = { ...state };
+        if (filterState.totalFrom || filterState.totalTo) {
+            const from = filterState.totalFrom ? parseFloat(filterState.totalFrom) : '';
+            const to = filterState.totalTo ? parseFloat(filterState.totalTo) : '';
+            filterState.total = [from, to];
+        }
+
+
         // @todo: #4.5 — отфильтровать данные используя компаратор
         return data.filter(row => compare(row, state));
     };
