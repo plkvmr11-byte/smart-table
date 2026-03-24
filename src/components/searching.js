@@ -5,23 +5,20 @@ import { rules, createComparison } from "../lib/compare.js";
  * @param {string} searchField - имя поля фильтра в state
  * @returns {(data: Array, state: Object, action?: HTMLElement) => Array} - функция фильтрации данных
  */
-export function initSearching(searchField) {
-    // Настройка компаратора
-    const compare = createComparison(
-        {
-            [searchField]: rules.searchMultipleFields(
-                searchField,
-                ['date', 'customer', 'seller'],
-                false
-            )
-        },
-        'skipEmptyTargetValues'
-    );
-    
+import { rules, createComparison } from "../lib/compare.js";
 
-    // Возвращаем функцию фильтрации
+export function initSearching(searchField) {
+    const compare = createComparison(
+        [
+            'skipEmptyTargetValues',
+            'skipNonExistentSourceFields'
+        ],
+        [
+            rules.searchMultipleFields(searchField, ['date', 'customer', 'seller'], false)
+        ]
+    );
+
     return (data, state, action) => {
-        // Сброс поля поиска, если нажата кнопка сброса
         if (action && action.name === 'clear') {
             const parent = action.parentElement;
             const input = parent.querySelector('input');
@@ -32,11 +29,8 @@ export function initSearching(searchField) {
         }
 
         const searchValue = state[searchField];
-
-        // Если поиск пустой — возвращаем все данные
         if (!searchValue) return data;
-
-        // Фильтруем данные с помощью компаратора
+        
         return data.filter(row => compare(row, state));
     };
 }

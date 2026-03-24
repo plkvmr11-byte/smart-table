@@ -19,22 +19,7 @@ export function initFiltering(elements, indexes) {
         });
 
     // @todo: #4.3 — настроить компаратор
-    const extendedRules = {
-        ...defaultRules,
-        totalFrom: (value, target) => {
-            if (!target) return true;
-            const numValue = parseFloat(value);
-            const numTarget = parseFloat(target);
-            return !isNaN(numValue) && !isNaN(numTarget) && numValue >= numTarget;
-        },
-        totalTo: (value, target) => {
-            if (!target) return true;
-            const numValue = parseFloat(value);
-            const numTarget = parseFloat(target);
-            return !isNaN(numValue) && !isNaN(numTarget) && numValue <= numTarget;
-        }
-    };
-    const compare = createComparison(extendedRules);
+    const compare = createComparison(defaultRules);
 
     return (data, state, action) => {
         // @todo: #4.2 — обработать очистку полей
@@ -48,7 +33,16 @@ export function initFiltering(elements, indexes) {
             }
         }
 
+        // Преобразуем totalFrom и totalTo в массив для правила arrayAsRange
+        const filterState = { ...state };
+        
+        if (filterState.totalFrom || filterState.totalTo) {
+            const from = filterState.totalFrom ? parseFloat(filterState.totalFrom) : '';
+            const to = filterState.totalTo ? parseFloat(filterState.totalTo) : '';
+            filterState.total = [from, to];
+        }
+
         // @todo: #4.5 — отфильтровать данные используя компаратор
-        return data.filter(row => compare(row, state));
+        return data.filter(row => compare(row, filterState));
     };
 }
