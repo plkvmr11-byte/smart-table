@@ -1,4 +1,4 @@
-import {createComparison, defaultRules} from "../lib/compare.js";
+import { createComparison, defaultRules } from "../lib/compare.js";
 
 export function initFiltering(elements, indexes) {
     // @todo: #4.1 — заполнить выпадающие списки опциями
@@ -6,37 +6,44 @@ export function initFiltering(elements, indexes) {
         .forEach((elementName) => {
             const selectElement = elements[elementName];
             if (selectElement) {
-                // Очищаем существующие опции
                 selectElement.innerHTML = '<option value="">Все</option>';
-
-                // Добавляем новые опции
                 const options = Object.values(indexes[elementName])
                     .map(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                return option;
-            });
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        return option;
+                    });
                 selectElement.append(...options);
             }
         });
 
     // @todo: #4.3 — настроить компаратор
-    const compare = createComparison(defaultRules);
+    const extendedRules = {
+        ...defaultRules,
+        totalFrom: (value, target) => {
+            if (!target) return true;
+            const numValue = parseFloat(value);
+            const numTarget = parseFloat(target);
+            return !isNaN(numValue) && !isNaN(numTarget) && numValue >= numTarget;
+        },
+        totalTo: (value, target) => {
+            if (!target) return true;
+            const numValue = parseFloat(value);
+            const numTarget = parseFloat(target);
+            return !isNaN(numValue) && !isNaN(numTarget) && numValue <= numTarget;
+        }
+    };
+    const compare = createComparison(extendedRules);
 
     return (data, state, action) => {
-        // @todo: #4.2 — обработать очистку поля
+        // @todo: #4.2 — обработать очистку полей
         if (action && action.name === 'clear') {
-            // Находим родительский элемент кнопки
             const parent = action.parentElement;
-            // Ищем input в родительском элементе
             const input = parent.querySelector('input');
             if (input) {
-                // Сбрасываем значение поля ввода
                 input.value = '';
-                // Получаем имя поля из data-field кнопки
                 const fieldName = action.dataset.field;
-                // Сбрасываем соответствующее поле в state
                 state[fieldName] = '';
             }
         }
