@@ -6,17 +6,14 @@ export function initFiltering(elements, indexes) {
         .forEach((elementName) => {
             const selectElement = elements[elementName];
             if (selectElement) {
-                // Очищаем существующие опции
                 selectElement.innerHTML = '<option value="">Все</option>';
-
-                // Добавляем новые опции
                 const options = Object.values(indexes[elementName])
                     .map(name => {
-                const option = document.createElement('option');
-                option.value = name;
-                option.textContent = name;
-                return option;
-            });
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        return option;
+                    });
                 selectElement.append(...options);
             }
         });
@@ -25,31 +22,27 @@ export function initFiltering(elements, indexes) {
     const compare = createComparison(defaultRules);
 
     return (data, state, action) => {
-        // @todo: #4.2 — обработать очистку поля
+        // @todo: #4.2 — обработать очистку полей
         if (action && action.name === 'clear') {
-            // Находим родительский элемент кнопки
             const parent = action.parentElement;
-            // Ищем input в родительском элементе
             const input = parent.querySelector('input');
             if (input) {
-                // Сбрасываем значение поля ввода
                 input.value = '';
-                // Получаем имя поля из data-field кнопки
                 const fieldName = action.dataset.field;
-                // Сбрасываем соответствующее поле в state
                 state[fieldName] = '';
             }
         }
 
-         const filterState = { ...state };
-        if (filterState.totalFrom || filterState.totalTo) {
-            const from = filterState.totalFrom ? parseFloat(filterState.totalFrom) : '';
-            const to = filterState.totalTo ? parseFloat(filterState.totalTo) : '';
+        // Преобразуем totalFrom и totalTo в массив для правила arrayAsRange
+        const filterState = { ...state };
+        const from = filterState.totalFrom ? parseFloat(filterState.totalFrom) : '';
+        const to = filterState.totalTo ? parseFloat(filterState.totalTo) : '';
+        
+        if (from !== '' || to !== '') {
             filterState.total = [from, to];
         }
 
-
         // @todo: #4.5 — отфильтровать данные используя компаратор
-        return data.filter(row => compare(row, state));
+        return data.filter(row => compare(row, filterState));
     };
 }

@@ -8,16 +8,11 @@ import { rules, createComparison } from "../lib/compare.js";
 export function initSearching(searchField) {
     // Настройка компаратора
     const compare = createComparison(
-        {
-            [searchField]: rules.searchMultipleFields(
-                searchField,
-                ['date', 'customer', 'seller'],
-                false
-            )
-        },
-        'skipEmptyTargetValues'
+        ['skipEmptyTargetValues', 'skipNonExistentSourceFields'],
+        [
+            rules.searchMultipleFields(searchField, ['date', 'customer', 'seller'], false)
+        ]
     );
-    
 
     // Возвращаем функцию фильтрации
     return (data, state, action) => {
