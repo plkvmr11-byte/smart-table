@@ -1,4 +1,3 @@
-import { rules, createComparison } from "../lib/compare.js";
 
 /**
  * Инициализация поиска по таблице
@@ -6,32 +5,11 @@ import { rules, createComparison } from "../lib/compare.js";
  * @returns {(data: Array, state: Object, action?: HTMLElement) => Array} - функция фильтрации данных
  */
 export function initSearching(searchField) {
-    // Настройка компаратора
-    const compare = createComparison(
-        ['skipEmptyTargetValues'],
-        [
-            rules.searchMultipleFields(searchField, ['date', 'customer', 'seller'], false)
-        ]
-    );
+    
+     return (query, state, action) => { 
+    return state[searchField] ? Object.assign({}, query, { 
+        search: state[searchField] 
+    }) : query; 
+}
 
-    // Возвращаем функцию фильтрации
-    return (data, state, action) => {
-        // Сброс поля поиска, если нажата кнопка сброса
-        if (action && action.name === 'clear') {
-            const parent = action.parentElement;
-            const input = parent.querySelector('input');
-            if (input) {
-                input.value = '';
-                state[searchField] = '';
-            }
-        }
-
-        const searchValue = state[searchField];
-
-        // Если поиск пустой — возвращаем все данные
-        if (!searchValue) return data;
-
-        // Фильтруем данные с помощью компаратора
-        return data.filter(row => compare(row, state));
-    };
 }
