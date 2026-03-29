@@ -93,6 +93,25 @@ const { applyPagination, updatePagination } = initPagination(
 const appRoot = document.querySelector('#app');
 appRoot.appendChild(sampleTable.container);
 
+const clearButtons = document.querySelectorAll('[data-clear]');
+clearButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        const fieldToClear = btn.dataset.clear;
+        render({ dataset: { clear: fieldToClear } });
+    });
+});
+
+// Если кнопки создаются динамически, используем делегирование
+sampleTable.container.addEventListener('click', (e) => {
+    const clearBtn = e.target.closest('[data-clear]');
+    if (clearBtn) {
+        const fieldToClear = clearBtn.dataset.clear;
+        render({ dataset: { clear: fieldToClear } });
+    }
+});
+
+
+
 async function init() {
     const indexes = await api.getIndexes();
     updateIndexes(sampleTable.filter.elements, {

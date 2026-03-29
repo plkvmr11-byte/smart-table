@@ -11,20 +11,44 @@ export function initFiltering(elements) {
     }
 
     const applyFiltering = (query, state, action) => {
-         // код с обработкой очистки поля. добавила
-
-        if (action?.dataset?.clear) {
-        const fieldToClear = action.dataset.clear;
-        const filterElement = elements[fieldToClear];
-        
-        if (filterElement) {
-            if (filterElement.tagName === 'SELECT') {
-                filterElement.selectedIndex = 0;
-            } else if (filterElement.tagName === 'INPUT') {
-                filterElement.value = '';
-            }
+        // код с обработкой очистки поля. исправила
+        if (!action || action.tagName !== 'BUTTON' || !action.dataset?.field) {
+        return query;
         }
-    }
+
+        const fieldToClear = action.dataset.field.toLowerCase();
+
+        let elementKey = null;
+        let apiField = null;
+
+        if (fieldToClear === 'customer') {
+            elementKey = 'searchByCustomer';
+            apiField = 'customer';
+        } else if (fieldToClear === 'date') {
+            elementKey = 'searchByDate';
+            apiField = 'date';
+        }
+
+        const filterElement = elements[elementKey];
+        if (!filterElement) return query;
+
+        const newQuery = { ...query };
+        const value = filterElement.value?.trim();
+
+        if (apiField === 'date') {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                delete newQuery[`filter[${apiField}]`];
+            }
+        } else if (apiField) {
+            delete newQuery[`filter[${apiField}]`];
+        }
+
+        if (filterElement.tagName === 'SELECT') {
+            filterElement.selectedIndex = 0;
+        } else if (filterElement.tagName === 'INPUT') {
+            filterElement.value = '';
+        }
+
         // @todo: #4.5 — отфильтровать данные, используя компаратор
         const filter = {};
         Object.keys(elements).forEach(key => {
@@ -42,4 +66,4 @@ export function initFiltering(elements) {
         updateIndexes,
         applyFiltering
     }
-}
+} 
